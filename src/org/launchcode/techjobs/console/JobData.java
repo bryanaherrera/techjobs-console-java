@@ -7,9 +7,7 @@ import org.apache.commons.csv.CSVRecord;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by LaunchCode
@@ -42,6 +40,7 @@ public class JobData {
                 values.add(aValue);
             }
         }
+        Collections.sort(values);
 
         return values;
     }
@@ -51,7 +50,31 @@ public class JobData {
         // load data, if not already loaded
         loadData();
 
+        ArrayList<HashMap<String, String>> copyJobs = new ArrayList<>();
+//        totalJobs = (ArrayList<HashMap<String, String>>)allJobs.clone();
+//        for(HashMap<String, String> m : allJobs){
+//            copyJobs.add(new HashMap<String, String>(m));
+//        }
+
+//        return copyJobs;
         return allJobs;
+    }
+
+    public static ArrayList<HashMap<String, String>> findByValue(String value){
+        loadData();
+        ArrayList<HashMap<String, String>> dispalyJobs = new ArrayList<>();
+        for(HashMap<String, String> row: allJobs){
+            for(Map.Entry<String, String> entry : row.entrySet()) {
+                String lowerCaseValue = entry.getValue().toLowerCase();
+                if(lowerCaseValue.contains(value.toLowerCase())){
+                    if(!dispalyJobs.contains(row)) {
+                        dispalyJobs.add(row);
+                    }
+                }
+            }
+        }
+//        System.out.println(dispalyJobs.size());
+        return dispalyJobs;
     }
 
     /**
@@ -69,14 +92,15 @@ public class JobData {
 
         // load data, if not already loaded
         loadData();
-
+//        System.out.println(column);
+//        System.out.println(value);
         ArrayList<HashMap<String, String>> jobs = new ArrayList<>();
 
         for (HashMap<String, String> row : allJobs) {
 
-            String aValue = row.get(column);
+            String aValue = row.get(column).toLowerCase();
 
-            if (aValue.contains(value)) {
+            if (aValue.contains(value.toLowerCase())) {
                 jobs.add(row);
             }
         }
@@ -100,7 +124,7 @@ public class JobData {
             Reader in = new FileReader(DATA_FILE);
             CSVParser parser = CSVFormat.RFC4180.withFirstRecordAsHeader().parse(in);
             List<CSVRecord> records = parser.getRecords();
-            Integer numberOfColumns = records.get(0).size();
+            int numberOfColumns = records.get(0).size();
             String[] headers = parser.getHeaderMap().keySet().toArray(new String[numberOfColumns]);
 
             allJobs = new ArrayList<>();
@@ -115,7 +139,7 @@ public class JobData {
 
                 allJobs.add(newJob);
             }
-
+//            System.out.println(allJobs);
             // flag the data as loaded, so we don't do it twice
             isDataLoaded = true;
 
